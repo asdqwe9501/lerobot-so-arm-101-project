@@ -1,4 +1,4 @@
-# lerobot soarm101 project
+# LEROBOT SOARM101 PROJECT
 ![Image](https://github.com/user-attachments/assets/bbfb79ad-0a2f-4016-ad69-124146166fcf)
 
 ---
