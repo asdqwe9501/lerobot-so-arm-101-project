@@ -242,6 +242,9 @@ top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 15}}" \
 
 
 
+![Image](https://github.com/user-attachments/assets/029728b1-7fad-472a-a621-c47cbf89abae)
+
+
 
 
 
