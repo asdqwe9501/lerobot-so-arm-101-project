@@ -191,17 +191,52 @@ lerobot-teleoperate \
 
 ## Act 모델
 
-**ACT(Action Chunking Transformer) Policy**를 사용하여, 책상 위에 있는 펜 2개를 정리하는 로봇 을 학습시키는 것을 목표로 한다. 로봇은 카메라로부터 입력되는 이미지를 보고 펜의 위치를 판단한 뒤, 펜을 집어 정해진 위치로 옮기는 작업을 수행한다.
+본 프로젝트에서는 **ACT MODEL**을 사용하여 책상 위에 있는 펜 2개를 집어 통으로 옮기는 로봇 정리 작업을 구현하였다. 전체 과정은 데이터셋 수집, 데이터 추가 수집, 모델 학습 및 학습된 로봇 실행 단계로 구성된다.
 
-학습 데이터는 사람이 직접 로봇을 조작하여 수집하였으며, **총 20,000 스텝**의 데이터를 사용해 행동 모방 학습(Behavior Cloning) 방식으로 모델을 학습시켰다. 각 스텝에는 카메라 이미지와 로봇의 상태, 그리고 해당 시점에서의 행동 정보가 포함되어 있다.
+먼저 로봇이 학습할 데이터셋을 생성하기 위해 사람이 리더 암(leader arm)을 직접 조작하는 방식으로 데모 데이터를 수집하였다. 이때 팔로워 암(follower arm)은 리더 암의 동작을 따라 움직이며, 전면 카메라와 상단 카메라 두 대를 사용해 작업 환경을 촬영하였다. 데이터셋 생성에 사용한 명령어는 다음과 같다.
 
-ACT Policy는 한 번에 여러 행동을 묶어서 예측하는 구조를 가지고 있어, 연속적인 로봇 동작을 보다 안정적으로 수행할 수 있다는 장점이 있다. 이로 인해 펜을 집고 이동시키는 과정에서 비교적 부드러운 동작이 가능했다.
+```
+lerobot-record --robot.type=so101_follower --robot.port=COM3 --robot.id=my_awesome_follower_arm \
+--robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 640, height: 360, fps: 30},
+top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 30}}" \
+--teleop.type=so101_leader --teleop.port=COM4 --teleop.id=my_awesome_leader_arm \
+--display_data=false --dataset.repo_id=taeyoungss/Model_dataset2 \
+--dataset.num_episodes=20 --dataset.single_task="Grab the pens and move it into the box"
+```
 
-학습된 모델을 실제 환경에서 테스트한 결과, 로봇은 두 개의 펜을 순서대로 집어 정리하는 동작을 수행할 수 있었다. **전체 실험 기준 성공률은 약 70%**로 측정되었으며, 이는 두 개의 펜을 모두 올바른 위치에 정리한 경우를 성공으로 정의하였다.
+초기 데이터셋 생성 이후, 동일한 작업에 대해 추가적인 데이터를 수집하여 데이터 다양성을 늘렸다. 기존 데이터셋에 이어서 기록하기 위해 `--resume=true` 옵션을 사용하였다. 데이터셋 추가 수집에 사용한 명령어는 다음과 같다.
 
-실패는 주로 펜의 위치가 학습 데이터와 크게 다르거나, 집는 과정에서 펜이 미끄러지는 경우에 발생하였다. 이를 통해 데이터의 다양성과 로봇 그립 안정성이 성능에 중요한 요소임을 확인할 수 있었다.
+```
+lerobot-record --robot.type=so101_follower --robot.port=COM3 --robot.id=my_awesome_follower_arm \
+--robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 480, height: 640, fps: 30},
+top: {type: opencv, index_or_path: 1, width: 640, height: 480, fps: 30}}" \
+--teleop.type=so101_leader --teleop.port=COM4 --teleop.id=my_awesome_leader_arm \
+--display_data=false --dataset.repo_id=taeyoungss/act_cleandesk \
+--dataset.num_episodes=24 --dataset.single_task="Grab the stick and move it into the box" \
+--resume=true
+```
 
-본 실험을 통해 ACT Policy가 비교적 적은 학습 스텝에서도 간단한 로봇 정리 작업을 수행할 수 있음을 확인하였으며, 향후 데이터 보강을 통해 성능을 더 개선할 수 있을 것으로 기대된다.
+수집된 데이터를 기반으로 ACT Policy 모델을 학습시킨 후, 학습된 로봇을 실제 환경에서 실행하여 성능을 평가하였다. 학습된 모델을 불러와 로봇을 실행할 때 사용한 명령어는 다음과 같다.
+
+```
+lerobot-record \
+--robot.type=so101_follower \
+--robot.port=COM3 \
+--robot.id=my_awesome_follower_arm \
+--robot.cameras="{ front: {type: opencv, index_or_path: 0, width: 640, height: 360, fps: 15},
+top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 15}}" \
+--display_data=false \
+--dataset.repo_id=taeyoungss/eval_Act_Model2 \
+--dataset.num_episodes=5 \
+--dataset.reset_time_s=5 \
+--dataset.single_task="Grab the stick and move it into the box" \
+--policy.path=taeyoungss/Act_Model
+```
+
+실험 결과, 로봇은 책상 위의 펜을 인식하고 집어 박스로 옮기는 동작을 수행할 수 있었으며, 전체 성공률은 약 70% 정도로 측정되었다. 실패는 주로 펜을 집는 과정에서의 미끄러짐이나, 학습 데이터와 다른 위치에 펜이 놓인 경우에 발생하였다.
+
+본 실험을 통해 ACT Policy가 비교적 단순한 정리 작업에 효과적으로 적용될 수 있음을 확인하였으며, 향후 데이터셋 추가와 학습 스텝수를 늘릴시 성능을 더 향상시킬 수 있을 것으로 기대된다.
+
 
 
 
@@ -219,4 +254,6 @@ https://github.com/huggingface/lerobot
 https://huggingface.co/docs/lerobot/so101
 
 https://www.youtube.com/watch?v=ElZvzKRt9g8&t=150s
+
+https://roboseasy.github.io/docs/physical-ai/lerobot/so-arm/software/record-replay
 
