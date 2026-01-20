@@ -1,4 +1,4 @@
-# lerobot-so-arm-101-project-for-studying
+# lerobot soarm101 project
 ![Image](https://github.com/user-attachments/assets/bbfb79ad-0a2f-4016-ad69-124146166fcf)
 
 ---
