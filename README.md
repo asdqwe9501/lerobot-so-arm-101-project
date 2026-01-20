@@ -245,6 +245,8 @@ top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 15}}" \
 ![Image](https://github.com/user-attachments/assets/5ded7f40-a024-43bf-a796-51d15e0cda69)
 
 모델에 대한 영상은 아래 링크에서 다운해서 볼 수 있습니다
+
+
 https://huggingface.co/taeyoungss/Act_Model
 
 
