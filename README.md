@@ -189,13 +189,15 @@ lerobot-teleoperate \
 
 ---
 
-## Act 모델
+## Act Model
 
 ![Image](https://github.com/user-attachments/assets/a8fbd5a6-357a-4762-aa56-68399b7aaea4)
 
-본 프로젝트에서는 **ACT MODEL**을 사용하여 책상 위에 있는 펜 2개를 집어 통으로 옮기는 로봇 정리 작업을 구현하였다. 전체 과정은 데이터셋 수집, 데이터 추가 수집, 모델 학습 및 학습된 로봇 실행 단계로 구성된다.
+ACT Policy-based Robotic Sorting Task
 
-먼저 로봇이 학습할 데이터셋을 생성하기 위해 사람이 리더 암(leader arm)을 직접 조작하는 방식으로 데모 데이터를 수집하였다. 이때 팔로워 암(follower arm)은 리더 암의 동작을 따라 움직이며, 전면 카메라와 상단 카메라 두 대를 사용해 작업 환경을 촬영하였다. 데이터셋 생성에 사용한 명령어는 다음과 같다.
+In this project, we implemented a robotic sorting task using the ACT Policy model. The robot was trained to pick up two pens placed on a desk and move them into a container. The overall workflow consisted of dataset collection, additional data collection, model training, and execution of the trained robot.
+
+To create the initial dataset, demonstration data was collected through direct human control of the leader arm. The follower arm replicated the movements of the leader arm in real time. During this process, two cameras—a front-facing camera and a top-down camera—were used to capture the task environment and record visual observations along with the robot's motion data.
 
 ```
 lerobot-record --robot.type=so101_follower --robot.port=COM3 --robot.id=my_awesome_follower_arm \
@@ -206,7 +208,7 @@ top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 30}}" \
 --dataset.num_episodes=20 --dataset.single_task="Grab the pens and move it into the box"
 ```
 
-초기 데이터셋 생성 이후, 동일한 작업에 대해 추가적인 데이터를 수집하여 데이터 다양성을 늘렸다. 기존 데이터셋에 이어서 기록하기 위해 `--resume=true` 옵션을 사용하였다. 데이터셋 추가 수집에 사용한 명령어는 다음과 같다.
+After generating the initial dataset, additional demonstrations of the same task were collected to increase data diversity and improve the robustness of the model. The --resume=true option was used to append new data to the existing dataset without overwriting previous recordings.
 
 ```
 lerobot-record --robot.type=so101_follower --robot.port=COM3 --robot.id=my_awesome_follower_arm \
@@ -218,7 +220,7 @@ top: {type: opencv, index_or_path: 1, width: 640, height: 480, fps: 30}}" \
 --resume=true
 ```
 
-수집된 데이터를 기반으로 ACT Policy 모델을 학습시킨 후, 학습된 로봇을 실제 환경에서 실행하여 성능을 평가하였다. 학습된 모델을 불러와 로봇을 실행할 때 사용한 명령어는 다음과 같다.
+The collected dataset was then used to train the ACT Policy model. After training, the learned model was deployed on the robot and tested in a real-world environment to evaluate its performance.
 
 ```
 lerobot-record \
@@ -235,16 +237,15 @@ top: {type: opencv, index_or_path: 1, width: 640, height: 360, fps: 15}}" \
 --policy.path=taeyoungss/Act_Model
 ```
 
-실험 결과, 로봇은 책상 위의 펜을 인식하고 집어 박스로 옮기는 동작을 수행할 수 있었으며, 전체 성공률은 약 70% 정도로 측정되었다. 실패는 주로 펜을 집는 과정에서의 미끄러짐이나, 학습 데이터와 다른 위치에 펜이 놓인 경우에 발생하였다.
+Experimental results showed that the robot was able to successfully detect, grasp, and move the pens into the container. The overall success rate was approximately 70%. Failures mainly occurred due to slippage during grasping or when the pens were placed in positions not sufficiently represented in the training dataset.
 
-본 실험을 통해 ACT Policy가 비교적 단순한 정리 작업에 효과적으로 적용될 수 있음을 확인하였으며, 향후 데이터셋 추가와 학습 스텝수를 늘릴시 성능을 더 향상시킬 수 있을 것으로 기대된다.
-
+This experiment demonstrates that the ACT Policy model can be effectively applied to simple robotic manipulation and organization tasks. Future improvements, such as increasing the dataset size and extending the training duration, are expected to further enhance the robot’s performance and reliability.
 
 
 
 ![Image](https://github.com/user-attachments/assets/5ded7f40-a024-43bf-a796-51d15e0cda69)
 
-모델에 대한 영상은 아래 링크에서 다운해서 볼 수 있습니다
+You can download and watch the model demonstration video from the link below.
 
 
 https://huggingface.co/taeyoungss/eval_Act_Model
@@ -252,7 +253,7 @@ https://huggingface.co/taeyoungss/eval_Act_Model
 
 
 
-# 참고자료 
+# References 
 
 https://hyundoil.tistory.com/469
 
