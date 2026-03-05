@@ -248,7 +248,7 @@ This experiment demonstrates that the ACT Policy model can be effectively applie
 You can download and watch the model demonstration video from the link below.
 
 
-https://huggingface.co/taeyoungss/eval_Act_Model
+https://huggingface.co/taeyoungss
 
 
 
