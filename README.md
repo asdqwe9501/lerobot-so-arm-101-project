@@ -190,8 +190,8 @@ lerobot-teleoperate \
 ---
 
 ## Act Model
+![Image](https://github.com/user-attachments/assets/5ded7f40-a024-43bf-a796-51d15e0cda69)
 
-![Image](https://github.com/user-attachments/assets/a8fbd5a6-357a-4762-aa56-68399b7aaea4)
 
 ACT Policy-based Robotic Sorting Task
 
