@@ -243,7 +243,6 @@ This experiment demonstrates that the ACT Policy model can be effectively applie
 
 
 
-![Image](https://github.com/user-attachments/assets/5ded7f40-a024-43bf-a796-51d15e0cda69)
 
 You can download and watch the model demonstration video from the link below.
 
