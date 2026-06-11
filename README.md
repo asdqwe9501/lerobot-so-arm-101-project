@@ -32,9 +32,9 @@ For robot assembly and motor details:  https://huggingface.co/docs/lerobot/so101
 | Item        | Details                              |
 | --------- | ------------------------------- |
 | OS        | Windows 10 / 11                 |
-| IDE     | visual Studio Code  |
-| Python version | 3.10 이상 권장                      |
-| Package    | `lerobot`           |
+| IDE     | Visual Studio Code  |
+| Python version | 3.10 or higher recommended                      |
+| Package    | Lerobot           |
 | Terminal    | VSCode PowerShell      |
 
 >  * Conda environments are also supported, but this guide was written using VSCode's default Python environment.*
