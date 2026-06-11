@@ -6,10 +6,10 @@
 
 # LeRobot SO-ARM 101 Setup Guide
 
-이 문서는 **LeRobot SO-ARM 101 (Leader / Follower)** 로봇을 조립 및 설정한 뒤,
+This document is a complete guide covering the entire process from assembling and configuring the
+**LeRobot SO-ARM 101 (Leader / Follower)** robot to performing
+**motor detection → calibration → teleoperation**.
 
-
-**모터 인식 → 캘리브레이션 → 원격 조정(Teleoperation)** 까지 수행하는 전체 과정을 정리한 가이드입니다.
 
 
 | Leader-Arm Axis      | Motor | Gear Ratio |
