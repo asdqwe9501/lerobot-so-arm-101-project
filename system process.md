@@ -1,172 +1,160 @@
-# ACT Policy 기반 로봇 모방학습 시스템 구현 및 원리
-
-
----
-
-## 1. 시스템 개요
-
-이 시스템은 **사람이 시범을 보여주면 로봇이 그대로 배우고, 혼자서 과업을 수행할 수 있는 모방학습 시스템**입니다.
-
-* 사람이 펜을 집어 통에 넣는 동작을 시연하면, 로봇은 **카메라와 센서 정보를 기반으로 학습**합니다.
-* 학습된 모델은 **미래 연속 동작(Action Chunk)을 예측**해, 로봇 팔을 자연스럽게 움직이도록 합니다.
-
-### 구성 요소
-
-1. **리더 암(Teacher Arm)**
-
-   * 전문가 시연 → 정답 동작(Action Label) 기록
-   * 팔로우 암 학습의 기준 데이터 제공
-
-2. **팔로우 암(Student Arm)**
-
-   * 학습 단계: 리더 암 데이터를 보고 연습
-   * 실행 단계: 학습된 모델 명령으로 실제 펜 정리 수행
-
-3. **카메라(Vision Sensor)**
-
-   * 환경 관측 → 상태 데이터(State Observation) 생성
-   * 이미지 → CNN → **피처 벡터(Feature Vector)**로 압축
-
-4. **ACT Policy 모델**
-
-   * 입력: 카메라 이미지 + 관절 상태
-   * 출력: 미래 수십 스텝 동작(Action Chunk)
-   * 선택적 CVAE: 시연 스타일(z) 추출 → 다양한 동작 생성 가능
-
- 쉽게 말하자면:
-
-> “사람이 하는 펜 정리 동작을 로봇이 보고 배우고, 카메라와 센서를 활용해 혼자서도 부드럽고 자연스럽게 펜을 정리할 수 있게 만드는 시스템”
+# ACT Policy-Based Robot Imitation Learning System: Implementation and Principles
 
 ---
 
-## 2. 하드웨어 구성 및 역할
+## 1. System Overview
 
-| 장치        | 역할        | 세부 설명                                  |
-| --------- | --------- | -------------------------------------- |
-| **리더 암**  | 시연 데이터 수집 | 리더 암은 전문가가 로봇을 직접 조작하면서 수행한 관절 움직임을 그대로 기록하여, 각 시점의 상태에 대응되는 정답 동작(Action Label)을 생성 |
-| **팔로우 암** | 학습 및 실행   | 학습 단계: 시연 데이터 재현, 실행 단계: 모델 명령 수행      |
-| **카메라**   | 환경 관측     | 펜과 통 위치 관측, 이미지 → 피처 벡터로 변환            |
-| **센서**    | 관절 상태 수집  | 리더 암 관절 각도, 속도, 그립 상태 측정 → 선형 레이어로 임베딩 |
+This system is an **imitation learning system where a robot learns from human demonstrations and performs tasks autonomously**.
 
+* When a human demonstrates picking up a pen and placing it into a container, the robot **learns from camera and sensor data**.
+* The trained model **predicts future sequential actions (Action Chunks)** to drive the robot arm smoothly.
+
+### Components
+
+1. **Leader Arm (Teacher Arm)**
+   * Records expert demonstrations → generates ground-truth actions (Action Labels)
+   * Provides reference data for training the follower arm
+
+2. **Follower Arm (Student Arm)**
+   * Training phase: learns by replicating leader arm data
+   * Execution phase: performs the actual pen-sorting task using the trained model
+
+3. **Camera (Vision Sensor)**
+   * Observes the environment → generates state observation data
+   * Images → CNN → compressed into **feature vectors**
+
+4. **ACT Policy Model**
+   * Input: camera images + joint states
+   * Output: future multi-step action sequence (Action Chunk)
+   * Optional CVAE: extracts demonstration style (z) → enables diverse motion generation
+
+In short:
+
+> "A system where the robot watches a human sort pens, learns from the demonstration, and autonomously performs the same task smoothly and naturally using cameras and sensors."
 
 ---
 
-## 3. 데이터셋 생성 과정
+## 2. Hardware Configuration and Roles
 
-### 3-1. 환경 세팅
+| Device           | Role                        | Description                                                                                                                                          |
+| ---------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Leader Arm**   | Demonstration data capture  | Records the expert's joint movements during manual operation, generating ground-truth action labels corresponding to each state at every time step.  |
+| **Follower Arm** | Training and execution      | Training phase: reproduces demonstration data. Execution phase: carries out commands from the trained model.                                         |
+| **Camera**       | Environment observation     | Observes the positions of pens and the container; converts images into feature vectors.                                                              |
+| **Sensors**      | Joint state acquisition     | Measures leader arm joint angles, velocities, and grip state → embedded via linear layers.                                                           |
 
-* 펜, 통, 작업대 배치
-* 다양한 위치, 배치, 조명 조건으로 환경 변화 → 모델 일반화 학습
+---
 
-### 3-2. 시연 동작 기록
+## 3. Dataset Construction
 
-* 리더 암으로 펜 정리 시연
-* 동시에:
+### 3-1. Environment Setup
 
-  * 관절 센서 데이터 기록
-  * 카메라 영상 촬영
-* 각 프레임에 대응되는 **정답 동작(Action Label)** 저장
+* Arrange pens, container, and workspace
+* Vary positions, layouts, and lighting conditions → enables the model to generalize
 
-### 3-3. 상태-동작 쌍 생성
+### 3-2. Recording Demonstrations
 
-* 이미지 → CNN → **피처 벡터(Feature Vector)**
-* 관절 상태 → 선형 레이어 → 임베딩
-* `(피처 벡터 + 관절 임베딩, Action Label)` 쌍 생성
+* Perform pen-sorting demonstrations using the leader arm
+* Simultaneously:
+  * Record joint sensor data
+  * Capture camera footage
+* Save the corresponding **ground-truth action labels (Action Labels)** for each frame
 
-**피처 벡터 (Feature Vector)**
+### 3-3. Generating State-Action Pairs
 
-이미지를 이해하기 위한 압축된 숫자 정보
+* Images → CNN → **Feature Vectors**
+* Joint states → Linear layer → Embeddings
+* Generate `(feature vector + joint embedding, Action Label)` pairs
 
-**관절 임베딩**
+**Feature Vector**
+Compressed numerical representation of an image that the model uses to understand the visual scene.
 
-로봇 관절 상태(각도, 위치 등)를 모델이 이해하기 좋은 형태로 변환한 것
+**Joint Embedding**
+A transformed representation of the robot's joint states (angles, positions, etc.) in a format the model can process effectively.
 
-### 3-4. 데이터 저장 예시
+### 3-4. Dataset Structure Example
 
 ```text
 dataset/
-├── images/          # 카메라 프레임
+├── images/          # Camera frames
 │   ├── frame_0001.png
 │   ├── frame_0002.png
-├── actions/         # 리더 암 동작
+├── actions/         # Leader arm actions
 │   ├── frame_0001.txt
 │   ├── frame_0002.txt
-└── metadata.csv     # 이미지 ↔ 동작 매핑
+└── metadata.csv     # Image ↔ action mapping
 ```
 
-### 3-5. 데이터 생성 목적
+### 3-5. Purpose of Dataset Construction
 
-* **정확한 상태-동작 매핑** 확보
-* **일반화 성능 향상** → 특정 좌표 외우기 방지
-* **연속 동작(Action Chunk) 학습 가능**
+* Obtain **accurate state-action mappings**
+* Improve **generalization** → prevent the model from memorizing specific coordinates
+* Enable learning of **sequential actions (Action Chunks)**
 
 ---
 
-## 4. ACT Policy 학습 메커니즘
+## 4. ACT Policy Learning Mechanism
 
-### 4-1. 입력과 출력
+### 4-1. Inputs and Outputs
 
-| 요소                | 설명                |
-| ----------------- | ----------------- |
-| 입력 (Observation)  | 카메라 이미지, 로봇 관절 상태 |
-| 출력 (Action Chunk) | 미래 연속 동작 시퀀스      |
-| 정답 라벨             | 전문가 시연의 실제 동작 시퀀스 |
+| Element              | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| Input (Observation)  | Camera images, robot joint states                  |
+| Output (Action Chunk)| Future sequential action series                    |
+| Ground-Truth Label   | Actual action sequence from expert demonstrations  |
 
-시퀀스(Sequence)란? 
-시간 순서대로 이어진 데이터 묶음이다
+**What is a Sequence?**
+A sequence is a bundle of data arranged in chronological order.
 
-### 4-2. 아키텍처 구성
+### 4-2. Architecture
 
 1. **Vision + Proprioception Encoder**
+   * Images → CNN → Feature Vectors
+   * Joint states → Linear layer → Embeddings
+   * Two vectors combined → fed into Transformer
 
-   * 이미지 → CNN → 피처 벡터
-   * 관절 상태 → 선형 레이어 → 임베딩
-   * 두 벡터 결합 → Transformer 입력
+2. **Transformer-Based Sequence Model**
+   * Understands context from past states → predicts future Action Chunks
 
-2. **Transformer 기반 시퀀스 모델**
+3. **Optional CVAE**
+   * Extracts demonstration style (z)
+   * Enables diverse motion generation when needed → produces naturally flowing action sequences
 
-   * 과거 상태 맥락 이해 → 미래 Action Chunk 예측
+### 4-3. Training Process
 
-3. **선택적 CVAE**
-
-   * 시연 스타일(z) 추출
-   * 필요 시 다양한 스타일 동작 생성 가능 → 연속 동작 자연스러움
-
-### 4-3. 학습 과정
-
-1. 시연 데이터 수집 → 상태-동작 쌍 생성
-2. Encoder → 상태 벡터 생성
-3. Decoder → 미래 동작 시퀀스(Action Chunk) 예측
-4. Loss 계산 → 모델 파라미터 업데이트
-5. 반복 → 모델 수렴
+1. Collect demonstration data → generate state-action pairs
+2. Encoder → produce state vectors
+3. Decoder → predict future action sequence (Action Chunk)
+4. Calculate loss → update model parameters
+5. Repeat → model converges
 
 
-### 4-4. 추론(실행) 과정
+### 4-4. Inference (Execution) Process
 
-* 현재 상태 입력 → Action Chunk 예측
-* Temporal Ensembling → 연속 동작 부드럽게 실행
-* 팔로우 암으로 실제 동작 수행
+* Input current state → predict Action Chunk
+* Temporal Ensembling → execute sequential actions smoothly
+* Follower arm carries out the actual motions
 
 <img width="1376" height="768" alt="Image" src="https://github.com/user-attachments/assets/91058674-7f47-4176-b486-565b58874d3e" />
 
 ---
 
-## 5. ACT Policy 장점
+## 5. Advantages of ACT Policy
 
-* 장기 시퀀스 예측 가능 → 부드러운 연속 동작
-* 오차 누적 감소 → 단일 스텝 예측 대비 안정적
-* 적은 시연 데이터로도 학습 가능
-* Transformer + 선택적 CVAE → 시각 정보 + 시퀀스 정보 통합
-
----
-
-## 6. 결론
-
-* 본 시스템은 **리더-팔로우 로봇 구조, 카메라 관측, ACT Policy**를 결합
-* 데이터셋 구성과 학습 구조가 핵심이며, **연속 동작 예측과 Transformer 기반 학습** 덕분에 실제 로봇 과업 수행에 효과적
-* 선택적 CVAE로 **다양한 동작 스타일 생성** 가능, 일반화 학습 성능 향상
+* Capable of long-horizon sequence prediction → smooth, continuous motion
+* Reduces error accumulation → more stable than single-step prediction
+* Can be trained with relatively few demonstrations
+* Transformer + optional CVAE → integrates visual and sequential information
 
 ---
 
-## 참고 문헌자료와 이미지 출처 
+## 6. Conclusion
+
+* This system combines a **leader-follower robot structure, camera-based observation, and ACT Policy**
+* Dataset construction and the learning architecture are central; **sequential action prediction and Transformer-based learning** make it effective for real-world robotic tasks
+* The optional CVAE enables **diverse motion style generation**, improving generalization performance
+
+---
+
+## References and Image Sources
 https://wikidocs.net/327258
