@@ -8,6 +8,7 @@
 
 This document is a complete guide covering the entire process from assembling and configuring the
 **LeRobot SO-ARM 101 (Leader / Follower)** robot to performing
+
 **motor detection → calibration → teleoperation**.
 
 
@@ -21,60 +22,60 @@ This document is a complete guide covering the entire process from assembling an
 | Wrist Roll            | 5     | 1 / 147    |
 | Gripper               | 6     | 1 / 147    |
 
-로봇 조립 및 모터에 관한 내용 
-https://huggingface.co/docs/lerobot/so101
+For robot assembly and motor details:  https://huggingface.co/docs/lerobot/so101
 
 
 ---
 
-## 개발 환경
+## Development Environment
 
-| 항목        | 내용                              |
+| Item        | Details                              |
 | --------- | ------------------------------- |
 | OS        | Windows 10 / 11                 |
-| 실행 환경     | **Visual Studio Code (VSCode)** |
-| Python 버전 | 3.10 이상 권장                      |
-| 패키지 설치    | `lerobot`           |
-| 실행 터미널    | VSCode 내장 터미널 (PowerShell)      |
+| IDE     | visual Studio Code  |
+| Python version | 3.10 이상 권장                      |
+| Package    | `lerobot`           |
+| Terminal    | VSCode PowerShell      |
 
->  *콘다 환경에서도 가능하지만, 본 실습은 VSCode 기본 Python 환경에서 진행되었습니다.*
+>  * Conda environments are also supported, but this guide was written using VSCode's default Python environment.*
+>
 > 
-> 패키지 설치 방법 https://huggingface.co/docs/lerobot/installation
+> Package installation: https://huggingface.co/docs/lerobot/installation
 > 
 
 ---
 
-## 1. 포트 찾기
+## 1. Finding the Port
 
-먼저 로봇의 시리얼 포트를 확인합니다. 
-컨트롤 보드에 USB포트와 어댑터를 연결한 후 파이썬 터미널에 아래 명령어를 실행합니다.
+First, identify the serial port of the robot.
+Connect the USB port and adapter to the control board, then run the following command in the Python terminal.
 
 
-영상 참조 https://huggingface.co/docs/lerobot/so101
+Reference: https://huggingface.co/docs/lerobot/so101
 
 ```bash
 lerobot-find-port
 ```
 
-* 예: `COM3`, `COM4`
+* Example: `COM3`, `COM4`
 
 ---
 
-## 2. 모터 설정 (Motor Setup)
+## 2. Motor Setup
 
-순서에 따라 모터들을 컨트롤 보드에 연결한 후 각 모터 ID를 순서대로 등록합니다.
-
-
-영상 참조 https://huggingface.co/docs/lerobot/so101
+Connect the motors to the control board in order, then register each motor ID sequentially.
 
 
-### Follower Arm 설정
+Reference: https://huggingface.co/docs/lerobot/so101
+
+
+### Follower Arm setup
 
 ```bash
 lerobot-setup-motors --robot.type=so101_follower --robot.port=COM3
 ```
 
-**출력 예시**
+**Example output**
 
 ```
 Connect the controller board to the 'gripper' motor only and press enter.
@@ -85,13 +86,13 @@ Connect the controller board to the 'gripper' motor only and press enter.
 
 ---
 
-### Leader Arm 설정
+### Leader Arm setup
 
 ```bash
 lerobot-setup-motors --teleop.type=so101_leader --teleop.port=COM4
 ```
 
-**출력 예시**
+**Example output**
 
 ```
 Connect the controller board to the 'gripper' motor only and press enter.
@@ -102,21 +103,21 @@ Connect the controller board to the 'gripper' motor only and press enter.
 
 ---
 
-## 3. 캘리브레이션 (Calibration)
+## 3. Calibration
 
-모든 관절의 최소/최대/중앙 위치를 기록하여 동작 범위를 보정합니다.
-명령어 실행 한 후 Calibration 영상에 따라 각 모터들은 움직여줍니다. 
+Records the minimum, maximum, and center positions of each joint to calibrate the range of motion.
+After running the command, move each motor according to the calibration video.
 
 
-영상 참조 https://huggingface.co/docs/lerobot/so101
+Reference: https://huggingface.co/docs/lerobot/so101
 
-### 🦿 Follower Arm Calibration
+###  Follower Arm Calibration
 
 ```bash
 lerobot-calibrate --robot.type=so101_follower --robot.port=COM3 --robot.id=ty_follower_arm
 ```
 
-**결과 예시**
+**Example output**
 
 ```
 shoulder_pan    |    767 |   1978 |   3310
@@ -126,7 +127,7 @@ wrist_flex      |    844 |   2855 |   3194
 wrist_roll      |    112 |   2088 |   3989
 gripper         |   2046 |   2046 |   2047
 Calibration saved to:
-C:\Users\곽동현\.cache\huggingface\lerobot\calibration\robots\so101_follower\ty_follower_arm.json
+C:\Users\username\.cache\huggingface\lerobot\calibration\robots\so101_follower\ty_follower_arm.json
 ```
 
 ---
@@ -137,7 +138,7 @@ C:\Users\곽동현\.cache\huggingface\lerobot\calibration\robots\so101_follower\
 lerobot-calibrate --teleop.type=so101_leader --teleop.port=COM4 --teleop.id=ty_leader_arm
 ```
 
-**결과 예시**
+**Example output**
 
 ```
 shoulder_pan    |    730 |   1999 |   3238
@@ -147,17 +148,17 @@ wrist_flex      |    334 |   2361 |   2706
 wrist_roll      |    128 |   2035 |   3971
 gripper         |   2046 |   2047 |   2053
 Calibration saved to:
-C:\Users\곽동현\.cache\huggingface\lerobot\calibration\teleoperators\so101_leader\ty_leader_arm.json
+C:\Users\username\.cache\huggingface\lerobot\calibration\teleoperators\so101_leader\ty_leader_arm.json
 ```
 
 ---
 
-## 4. 원격 조정 (Teleoperation)
+## 4. Teleoperation
 
-리더 암(Leader Arm)의 움직임을 팔로워 암(Follower Arm)에 실시간으로 전달합니다.
+Transmits the movements of the Leader Arm to the Follower Arm in real time.
 
 
-영상 참조 https://huggingface.co/docs/lerobot/so101
+Reference: https://huggingface.co/docs/lerobot/so101
 
 ```bash
 lerobot-teleoperate \
@@ -165,27 +166,27 @@ lerobot-teleoperate \
   --teleop.type=so101_leader   --teleop.port=COM4 --teleop.id=ty_leader_arm
 ```
 
-* 리더 암을 움직이면 팔로워 암이 동일한 동작을 수행합니다.
-* 연결 성공 시 콘솔에 `"connected"` 메시지가 표시됩니다.
+- Moving the leader arm causes the follower arm to replicate the same motion.
+- Upon successful connection, a `"connected"` message will appear in the console
 
 ![Image](https://github.com/user-attachments/assets/a6bd1568-5d39-4819-bbc1-994f7ba60087)
 
 ---
 
-## 캘리브레이션 데이터 저장 경로
+## Calibration Data Storage Path
 
-| 구분           | 경로                                                                                       |
+| Type           | Path                                                                                       |
 | ------------ | ---------------------------------------------------------------------------------------- |
 | Follower Arm | `~/.cache/huggingface/lerobot/calibration/robots/so101_follower/ty_follower_arm.json`    |
 | Leader Arm   | `~/.cache/huggingface/lerobot/calibration/teleoperators/so101_leader/ty_leader_arm.json` |
 
 ---
 
-## 최종 점검
+## Final Checklist
 
-* 각 관절의 움직임이 자연스러운지 확인
-* 리더 ↔ 팔로워 실시간 반응 테스트
-* 문제가 있을 경우 캘리브레이션 재진행
+- Verify that each joint moves smoothly
+- Test real-time response between leader ↔ follower
+- If issues occur, redo the calibration
 
 ---
 
