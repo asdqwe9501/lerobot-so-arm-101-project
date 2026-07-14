@@ -244,7 +244,35 @@ Experimental results showed that the robot was able to successfully detect, gras
 This experiment demonstrates that the ACT Policy model can be effectively applied to simple robotic manipulation and organization tasks. Future improvements, such as increasing the dataset size and extending the training duration, are expected to further enhance the robot’s performance and reliability.
 
 
+### SmolVLA Pick-and-Place Project
 
+### Project Overview
+
+The earlier ACT experiment achieved about a 70% success rate on its pick-and-place task. Building on that, this project tested whether switching to a SmolVLA policy — with the object changed to a red ball — could handle the same pick-and-place task, this time guided by a natural-language instruction ("grab the red ball and put it in the box") rather than a fixed motion.
+
+### What is SmolVLA?
+
+SmolVLA is a compact Vision-Language-Action model built by Hugging Face for real-world robot control. In plain terms, it's a small AI model that looks at camera images, reads a text instruction, and outputs a sequence of motor commands — all in one forward pass. It's built from three pieces working together:
+
+
+A vision-language backbone (a small pretrained vision-language model) that turns camera frames and the instruction text into a shared understanding — essentially "seeing" the scene and "reading" the goal at the same time.
+An action expert, a lightweight network that translates that understanding into continuous robot joint movements using a technique called flow matching, which lets it generate smooth, precise motion trajectories rather than jerky discrete steps.
+Efficiency-focused design: because it's "Smol" (small), it can run on a single consumer GPU or even a CPU, and it supports asynchronous inference — the robot can keep moving while the next action chunk is being computed, so there's less lag between "thinking" and "doing."
+
+
+The key advantage over the earlier ACT policy is generalization through language: instead of memorizing "move to this fixed spot," SmolVLA learns to associate the words "red ball" and "box" with visual features, so it can find and grasp the object wherever it happens to be placed.
+
+### Data & Training
+
+Fifty demonstration episodes were collected via teleoperation (a human guiding the leader arm), recorded from both a front-facing and a top-down camera, all paired with the same instruction string. The pretrained lerobot/smolvla_base checkpoint was then fine-tuned on this dataset for 30,000 steps. Image color/saturation augmentation was deliberately turned off, since it was found to interfere with the model's ability to correctly ground the word "red" to the object's actual color.
+
+### Results
+
+The trained policy was tested over 5 real-robot trials and succeeded in 4 of them (~80% success rate) — an improvement over the ~70% baseline from the ACT experiment. Notably, the ball's position on the desk was varied between trials, and the robot still located and grasped it correctly each time — evidence that the grasp was driven by recognizing the object visually, not by memorizing a fixed location. The one failure was a case where the arm froze near the start of the episode and never recovered, rather than a targeting or grasping mistake.
+
+### Next Steps
+
+Planned extensions include training on multiple object colors so the color word in the instruction actually determines the target (true language grounding, not just a single fixed phrase), and integrating Whisper speech-to-text so the instruction can be spoken aloud instead of typed.
 
 You can download and watch the model demonstration video from the link below.
 
