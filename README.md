@@ -244,7 +244,7 @@ Experimental results showed that the robot was able to successfully detect, gras
 This experiment demonstrates that the ACT Policy model can be effectively applied to simple robotic manipulation and organization tasks. Future improvements, such as increasing the dataset size and extending the training duration, are expected to further enhance the robot’s performance and reliability.
 
 
-### SmolVLA Pick-and-Place Project
+### SmolVLA Model
 <img width="640" height="480" alt="Image" src="https://github.com/user-attachments/assets/9a013173-f3e2-4fd1-84bc-c6fc6734722f" />
 ### Project Overview
 
