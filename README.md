@@ -245,7 +245,7 @@ This experiment demonstrates that the ACT Policy model can be effectively applie
 
 
 ### SmolVLA Pick-and-Place Project
-<img width="640" height="480" alt="Image" src="https://github.com/user-attachments/assets/1b13f784-6f0a-4591-96dc-2b42ea17e841" />
+<img width="640" height="480" alt="Image" src="https://github.com/user-attachments/assets/9a013173-f3e2-4fd1-84bc-c6fc6734722f" />
 ### Project Overview
 
 The earlier ACT experiment achieved about a 70% success rate on its pick-and-place task. Building on that, this project tested whether switching to a SmolVLA policy — with the object changed to a red ball — could handle the same pick-and-place task, this time guided by a natural-language instruction ("grab the red ball and put it in the box") rather than a fixed motion.
