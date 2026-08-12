@@ -277,7 +277,7 @@ Planned extensions include training on multiple object colors so the color word 
 You can download and watch the model demonstration video from the link below.
 
 
-https://huggingface.co/taeyoungss
+[https://huggingface.co/taeyoungss](https://huggingface.co/datasets/taeyoungss/eval_smolvla_grab_the_redball)
 
 
 
