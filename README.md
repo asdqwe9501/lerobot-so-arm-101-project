@@ -195,7 +195,7 @@ lerobot-teleoperate \
 ![Image](https://github.com/user-attachments/assets/eb2c0fe5-aa5d-40b3-b602-832857d1e9a1)
 
 
-ACT Policy-based Robotic Sorting Task
+ACT Policy-based pick and place
 
 In this project, we implemented a robotic sorting task using the ACT Policy model. The robot was trained to pick up two pens placed on a desk and move them into a container. The overall workflow consisted of dataset collection, additional data collection, model training, and execution of the trained robot.
 
